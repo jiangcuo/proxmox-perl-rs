@@ -43,3 +43,17 @@ proxmox-subscription = "0.4"
 proxmox-sys = "0.5"
 proxmox-tfa = { version = "4.0.4", features = ["api"] }
 proxmox-time = "1.1.3"
+
+[patch.crates-io]
+proxmox-apt = { git = "https://github.com/jiangcuo/proxmox.git" , rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1" }
+proxmox-http = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-http-error = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-notify = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-openid = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-subscription = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-sys = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-tfa = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-time = { git = "https://github.com/jiangcuo/proxmox.git" ,  rev = "70e6472f8a8e8f34e8ec3b57b144fab02bacc3c1"  }
+proxmox-resource-scheduling  = { git = "https://git.proxmox.com/git/proxmox-resource-scheduling.git" , rev = "09c43554fa4e211504319107997b8c5eaba270ec"}
+perlmod  = { git = "https://git.proxmox.com/git/perlmod" , rev = "677cb0844646d7bfabcebeaaa35e84440d858195" }
+nix = { git = "https://github.com/jiangcuo/nix.git", rev = "fb787ef97be7df1b5ef3612ab6179a625d6b6c86" }
