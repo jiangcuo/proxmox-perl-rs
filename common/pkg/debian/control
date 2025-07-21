@@ -10,7 +10,7 @@ Homepage: https://www.proxmox.com
 Rules-Requires-Root: no
 
 Package: libproxmox-rs-perl
-Architecture: all
+Architecture: any
 # always bump both package if you change versioned Depends or Breaks respectively, otherwise systems
 # with both libpmg-rs-perl and libpve-rs-perl might load an outdated lib and break
 Depends: libpve-rs-perl (>= 0.10.3) | libpmg-rs-perl (>= 0.8.0),

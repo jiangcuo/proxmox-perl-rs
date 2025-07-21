@@ -3,10 +3,30 @@ include /usr/share/dpkg/pkg-info.mk
 PACKAGE=libpve-rs-perl
 export PERLMOD_PRODUCT=PVE
 
-ARCH:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
+ARCH:=$(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-PERL_INSTALLVENDORARCH != perl -MConfig -e 'print $$Config{installvendorarch};'
-PERL_INSTALLVENDORLIB != perl -MConfig -e 'print $$Config{installvendorlib};'
+ifeq ($(ARCH), riscv64)
+RUST_TARGET=riscv64gc-unknown-linux-gnu
+MULTIARCH=riscv64-linux-gnu
+endif 
+
+ifeq ($(ARCH), arm64)
+RUST_TARGET=aarch64-unknown-linux-gnu
+MULTIARCH=aarch64-linux-gnu
+endif
+
+ifeq ($(ARCH), loong64)
+RUST_TARGET=loongarch64-unknown-linux-gnu
+MULTIARCH=loongarch64-linux-gnu
+endif
+
+ifeq ($(ARCH), amd64)
+RUST_TARGET=x86_64-unknown-linux-gnu	
+MULTIARCH=x86_64-linux-gnu
+endif
+
+PERL_INSTALLVENDORARCH = /usr/lib/$(MULTIARCH)/perl5/5.40
+PERL_INSTALLVENDORLIB = /usr/share/perl5
 
 MAIN_DEB=$(PACKAGE)_$(DEB_VERSION)_$(ARCH).deb
 DBGSYM_DEB=$(PACKAGE)-dbgsym_$(DEB_VERSION)_$(ARCH).deb
@@ -70,7 +90,7 @@ all: PVE
 	cargo build $(CARGO_BUILD_ARGS)
 	mkdir -p test/Proxmox/Lib
 	sed -r -e \
-	  's@^sub libfile.*$$@sub libfile { "$(shell pwd)/target/$(TARGET_DIR)/libpve_rs.so"; }@' \
+	  's@^sub libfile.*$$@sub libfile { "$(shell pwd)/target/$(RUST_TARGET)/$(TARGET_DIR)/libpve_rs.so"; }@' \
 	  Proxmox/Lib/PVE.pm >test/Proxmox/Lib/PVE.pm
 
 Proxmox: Proxmox/Lib/PVE.pm
@@ -82,9 +102,9 @@ check: all
 	$(MAKE) -C test test
 
 .PHONY: install
-install: target/release/libpve_rs.so Proxmox/Lib/PVE.pm $(PERLMOD_PACKAGE_FILES)
+install: target/${RUST_TARGET}/release/libpve_rs.so Proxmox/Lib/PVE.pm $(PERLMOD_PACKAGE_FILES)
 	install -d -m755 $(DESTDIR)$(PERL_INSTALLVENDORARCH)/auto
-	install -m644 target/release/libpve_rs.so $(DESTDIR)$(PERL_INSTALLVENDORARCH)/auto/libpve_rs.so
+	install -m644 target/${RUST_TARGET}/release/libpve_rs.so $(DESTDIR)$(PERL_INSTALLVENDORARCH)/auto/libpve_rs.so
 	install -d -m755 $(DESTDIR)$(PERL_INSTALLVENDORLIB)
 	install -d -m755 $(DESTDIR)$(PERL_INSTALLVENDORLIB)/Proxmox/Lib
 	install -m644 Proxmox/Lib/PVE.pm $(DESTDIR)$(PERL_INSTALLVENDORLIB)/Proxmox/Lib/PVE.pm
@@ -118,7 +138,7 @@ $(BUILDDIR): src debian test common/src Cargo.toml Makefile .cargo/config.toml
 .PHONY: deb
 deb: $(DEBS)
 $(DEBS) &: $(BUILDDIR)
-	cd $(BUILDDIR); PATH="/usr/local/bin:/usr/bin" dpkg-buildpackage -b -us -uc
+	cd $(BUILDDIR); PATH="/usr/local/bin:/usr/bin" DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -b -us -uc -d --host-arch ${ARCH}
 	lintian $(DEBS)
 
 .PHONY: dsc

@@ -2,7 +2,7 @@ include /usr/share/dpkg/pkg-info.mk
 
 PACKAGE=libproxmox-rs-perl
 
-ARCH:=all
+ARCH:=$(shell dpkg-architecture -qDEB_HOST_ARCH)
 export GITVERSION:=$(shell git rev-parse HEAD)
 
 PERL_INSTALLVENDORARCH != perl -MConfig -e 'print $$Config{installvendorarch};'
@@ -52,7 +52,7 @@ $(BUILDDIR): debian PVE Proxmox Makefile
 .PHONY: deb
 deb: $(DEB)
 $(DEB): $(BUILDDIR)
-	cd $(BUILDDIR); dpkg-buildpackage -b -us -uc
+	cd $(BUILDDIR); dpkg-buildpackage -b -us -uc -a$(ARCH)
 	lintian $(DEB)
 
 .PHONY: dsc
