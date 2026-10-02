@@ -9,6 +9,14 @@ mod export {
     use perlmod::Value;
     use proxmox_http_error::HttpError;
     use proxmox_notify::api::Target;
+    use proxmox_notify::endpoints::dingtalk::{
+        DeleteableDingtalkProperty, DingtalkConfig, DingtalkConfigUpdater, DingtalkPrivateConfig,
+        DingtalkPrivateConfigUpdater,
+    };
+    use proxmox_notify::endpoints::feishu::{
+        DeleteableFeishuProperty, FeishuConfig, FeishuConfigUpdater, FeishuPrivateConfig,
+        FeishuPrivateConfigUpdater,
+    };
     use proxmox_notify::endpoints::gotify::{
         DeleteableGotifyProperty, GotifyConfig, GotifyConfigUpdater, GotifyPrivateConfig,
         GotifyPrivateConfigUpdater,
@@ -16,12 +24,20 @@ mod export {
     use proxmox_notify::endpoints::sendmail::{
         DeleteableSendmailProperty, SendmailConfig, SendmailConfigUpdater,
     };
+    use proxmox_notify::endpoints::sms::{
+        DeleteableSmsProperty, SmsConfig, SmsConfigUpdater, SmsPrivateConfig,
+        SmsPrivateConfigUpdater,
+    };
     use proxmox_notify::endpoints::smtp::{
         DeleteableSmtpProperty, SmtpConfig, SmtpConfigUpdater, SmtpMode, SmtpPrivateConfig,
         SmtpPrivateConfigUpdater,
     };
     use proxmox_notify::endpoints::webhook::{
         DeleteableWebhookProperty, WebhookConfig, WebhookConfigUpdater,
+    };
+    use proxmox_notify::endpoints::wecom::{
+        DeleteableWecomProperty, WecomConfig, WecomConfigUpdater, WecomPrivateConfig,
+        WecomPrivateConfigUpdater,
     };
     use proxmox_notify::matcher::{
         CalendarMatcher, DeleteableMatcherProperty, FieldMatcher, MatchModeOperator, MatcherConfig,
@@ -458,6 +474,238 @@ mod export {
     ) -> Result<(), HttpError> {
         let mut config = this.config.lock().unwrap();
         api::webhook::delete_endpoint(&mut config, name)
+    }
+
+    #[export(serialize_error)]
+    fn get_dingtalk_endpoints(
+        #[try_from_ref] this: &NotificationConfig,
+    ) -> Result<Vec<DingtalkConfig>, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::dingtalk::get_endpoints(&config)
+    }
+
+    #[export(serialize_error)]
+    fn get_dingtalk_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        id: &str,
+    ) -> Result<DingtalkConfig, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::dingtalk::get_endpoint(&config, id)
+    }
+
+    #[export(serialize_error)]
+    fn add_dingtalk_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        endpoint_config: DingtalkConfig,
+        private_endpoint_config: DingtalkPrivateConfig,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::dingtalk::add_endpoint(&mut config, endpoint_config, private_endpoint_config)
+    }
+
+    #[export(serialize_error)]
+    fn update_dingtalk_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+        config_updater: DingtalkConfigUpdater,
+        private_config_updater: DingtalkPrivateConfigUpdater,
+        delete: Option<Vec<DeleteableDingtalkProperty>>,
+        digest: Option<&str>,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        let digest = decode_digest(digest)?;
+
+        api::dingtalk::update_endpoint(
+            &mut config,
+            name,
+            config_updater,
+            private_config_updater,
+            delete.as_deref(),
+            digest.as_deref(),
+        )
+    }
+
+    #[export(serialize_error)]
+    fn delete_dingtalk_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::dingtalk::delete_dingtalk_endpoint(&mut config, name)
+    }
+
+    #[export(serialize_error)]
+    fn get_feishu_endpoints(
+        #[try_from_ref] this: &NotificationConfig,
+    ) -> Result<Vec<FeishuConfig>, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::feishu::get_endpoints(&config)
+    }
+
+    #[export(serialize_error)]
+    fn get_feishu_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        id: &str,
+    ) -> Result<FeishuConfig, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::feishu::get_endpoint(&config, id)
+    }
+
+    #[export(serialize_error)]
+    fn add_feishu_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        endpoint_config: FeishuConfig,
+        private_endpoint_config: FeishuPrivateConfig,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::feishu::add_endpoint(&mut config, endpoint_config, private_endpoint_config)
+    }
+
+    #[export(serialize_error)]
+    fn update_feishu_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+        config_updater: FeishuConfigUpdater,
+        private_config_updater: FeishuPrivateConfigUpdater,
+        delete: Option<Vec<DeleteableFeishuProperty>>,
+        digest: Option<&str>,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        let digest = decode_digest(digest)?;
+
+        api::feishu::update_endpoint(
+            &mut config,
+            name,
+            config_updater,
+            private_config_updater,
+            delete.as_deref(),
+            digest.as_deref(),
+        )
+    }
+
+    #[export(serialize_error)]
+    fn delete_feishu_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::feishu::delete_feishu_endpoint(&mut config, name)
+    }
+
+    #[export(serialize_error)]
+    fn get_wecom_endpoints(
+        #[try_from_ref] this: &NotificationConfig,
+    ) -> Result<Vec<WecomConfig>, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::wecom::get_endpoints(&config)
+    }
+
+    #[export(serialize_error)]
+    fn get_wecom_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        id: &str,
+    ) -> Result<WecomConfig, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::wecom::get_endpoint(&config, id)
+    }
+
+    #[export(serialize_error)]
+    fn add_wecom_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        endpoint_config: WecomConfig,
+        private_endpoint_config: WecomPrivateConfig,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::wecom::add_endpoint(&mut config, endpoint_config, private_endpoint_config)
+    }
+
+    #[export(serialize_error)]
+    fn update_wecom_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+        config_updater: WecomConfigUpdater,
+        private_config_updater: WecomPrivateConfigUpdater,
+        delete: Option<Vec<DeleteableWecomProperty>>,
+        digest: Option<&str>,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        let digest = decode_digest(digest)?;
+
+        api::wecom::update_endpoint(
+            &mut config,
+            name,
+            config_updater,
+            private_config_updater,
+            delete.as_deref(),
+            digest.as_deref(),
+        )
+    }
+
+    #[export(serialize_error)]
+    fn delete_wecom_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::wecom::delete_wecom_endpoint(&mut config, name)
+    }
+
+    #[export(serialize_error)]
+    fn get_sms_endpoints(
+        #[try_from_ref] this: &NotificationConfig,
+    ) -> Result<Vec<SmsConfig>, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::sms::get_endpoints(&config)
+    }
+
+    #[export(serialize_error)]
+    fn get_sms_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        id: &str,
+    ) -> Result<SmsConfig, HttpError> {
+        let config = this.config.lock().unwrap();
+        api::sms::get_endpoint(&config, id)
+    }
+
+    #[export(serialize_error)]
+    fn add_sms_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        endpoint_config: SmsConfig,
+        private_endpoint_config: SmsPrivateConfig,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::sms::add_endpoint(&mut config, endpoint_config, private_endpoint_config)
+    }
+
+    #[export(serialize_error)]
+    fn update_sms_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+        config_updater: SmsConfigUpdater,
+        private_config_updater: SmsPrivateConfigUpdater,
+        delete: Option<Vec<DeleteableSmsProperty>>,
+        digest: Option<&str>,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        let digest = decode_digest(digest)?;
+
+        api::sms::update_endpoint(
+            &mut config,
+            name,
+            config_updater,
+            private_config_updater,
+            delete.as_deref(),
+            digest.as_deref(),
+        )
+    }
+
+    #[export(serialize_error)]
+    fn delete_sms_endpoint(
+        #[try_from_ref] this: &NotificationConfig,
+        name: &str,
+    ) -> Result<(), HttpError> {
+        let mut config = this.config.lock().unwrap();
+        api::sms::delete_sms_endpoint(&mut config, name)
     }
 
     #[export(serialize_error)]
